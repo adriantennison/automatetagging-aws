@@ -1,16 +1,16 @@
-### README: AWS Resource Auto-Tagging System with Terraform
+### AWS Resource Auto-Tagging System with Terraform
 
-This project provides a Terraform-based solution to automatically tag AWS resources that are detected as untaged by AWS Config rules. The system uses a combination of AWS Config, AWS Lambda, and Amazon EventBridge (formerly AWS CloudWatch Events) to monitor and enforce tagging policies across specified resource types within an AWS environment.
+This project leverages Terraform to automate the tagging of AWS resources that are detected as untagged by AWS Config rules. The system employs a combination of AWS Config, AWS Lambda, and Amazon EventBridge to monitor and enforce tagging policies across specified resource types within an AWS environment.
 
-### Project Structure
+#### Project Structure
 
-The Terraform configuration is modularized into three main components:
+The Terraform configuration is modularized into three primary components:
 
 - **Config Module**: Manages AWS Config rules to detect untagged resources.
 - **Lambda Module**: Contains the Lambda function used to automatically tag resources.
 - **EventBridge Module**: Sets up EventBridge rules to trigger the Lambda function based on AWS Config rule findings.
 
-The directory structure is as follows:
+The directory structure is organized as follows:
 
 ```
 terraform-tagging-automation/
@@ -25,63 +25,52 @@ terraform-tagging-automation/
 │   └── eventbridge/ # EventBridge module
 ```
 
-### Prerequisites
+#### Prerequisites
 
 - Terraform v0.14 or newer
 - AWS CLI configured with Administrator access
-- An S3 bucket for Lambda deployment package
+- An S3 bucket for the Lambda deployment package
 
-### Setup and Configuration
+#### Setup and Configuration
 
-1. **Prepare Lambda Function Code**:
-   - Package your Lambda function code into a ZIP file and upload it to an S3 bucket. This function should have the logic to apply tags to AWS resources.
+1. **Lambda Function Code**:
+   - Place your Python Lambda function code and any dependencies in the `src` directory within the `lambda` module.
+   - Use the provided shell script `package_lambda.sh` to package your Lambda function. This script automates the packaging of your Python Lambda function, including any dependencies, into a ZIP file for deployment.
 
-2. **Configure Terraform Variables**:
-   - Create a `terraform.tfvars` file or multiple `.tfvars` files for different environments (e.g., `prod.tfvars`, `dev.tfvars`).
-   - Define the required variables such as `resource_types`, `lambda_s3_bucket`, and `lambda_s3_key`.
+2. **Terraform Variables Configuration**:
+   - Define necessary variables such as `resource_types`, `s3_bucket_name`, and `s3_key` in your `.tfvars` file for environment-specific configurations.
 
-Example `terraform.tfvars` content:
+Example content of `terraform.tfvars`:
 ```hcl
 resource_types = ["AWS::EC2::Instance", "AWS::S3::Bucket"]
-lambda_s3_bucket = "my-lambda-bucket"
-lambda_s3_key = "lambda-code.zip"
+s3_bucket_name = "my-lambda-deployments"
+s3_key = "lambda_function.zip"
 ```
 
-3. **Initialize Terraform**:
-   - Run `terraform init` in the project directory to initialize Terraform and download the necessary providers.
+3. **Deploy the Infrastructure**:
+   - Initialize Terraform with `terraform init` to download necessary providers.
+   - Deploy your configurations with `terraform apply -var-file="prod.tfvars"` to apply your infrastructure setup.
 
-4. **Deploy the Infrastructure**:
-   - Execute `terraform plan -var-file="prod.tfvars"` to see the deployment plan.
-   - Apply the configuration using `terraform apply -var-file="prod.tfvars"`.
+#### Deployment Steps
 
-### Usage
+1. **Package Lambda Function**:
+   - Run the packaging script `package_lambda.sh` which is invoked automatically by Terraform using the `null_resource` with a `local-exec` provisioner.
 
-Once deployed, the system will automatically monitor the specified AWS resource types for missing tags as defined in the AWS Config rule. When a resource is detected as untagged, the EventBridge rule will trigger the Lambda function to apply the default tags.
+2. **Update and Deploy**:
+   - Terraform manages the deployment of your Lambda function, ensuring that the most recent code is packaged and uploaded to an S3 bucket before updating the Lambda function.
 
-### Improvements
+3. **Monitor and Maintain**:
+   - Use Terraform outputs to retrieve important information like AWS Config rule IDs and Lambda function ARNs.
+   - Monitor the execution and effectiveness of the Lambda function through AWS CloudWatch linked via EventBridge.
 
-1. **Expand Resource Coverage**:
-   - Update the `resource_types` variable to include additional AWS resource types that support tagging.
+#### Enhancements and Security
 
-2. **Enhance Tagging Logic**:
-   - Modify the Lambda function to implement more complex tagging logic, possibly using external data sources to determine appropriate tags.
+- **Environment Variables**: The Lambda function configuration now includes environment variables, which are defined in the Terraform module and can be adjusted as needed for different deployments.
+- **Security Practices**: Ensure IAM roles and policies are tightly scoped to minimize permissions while still allowing necessary actions.
 
-3. **Security Enhancements**:
-   - Ensure that the IAM roles and policies assigned to the Lambda function adhere strictly to the principle of least privilege.
+#### Contribution and Support
 
-4. **Error Handling and Monitoring**:
-   - Add error handling in the Lambda function to manage tagging failures.
-   - Set up additional monitoring and alerts through AWS CloudWatch for the Lambda function and EventBridge rule.
+- **Contributions**: Contributions are welcome! Please fork the repository, make your changes, and submit a pull request.
+- **Support**: For bugs and feature requests, please use the GitHub issues section of this repository.
 
-5. **Environment Specific Configurations**:
-   - Utilize workspace or additional `.tfvars` files for managing multiple environments to ensure isolation between production, development, and staging configurations.
-
-### Contributing
-
-Contributions to improve the auto-tagging system are welcome. Before making any changes, please discuss the changes via issue or email with the repository maintainers.
-
-### Support
-
-For support, feature requests, or bug reporting, please open an issue in the repository or contact the maintainers directly.
-
-This README outlines how to deploy and manage the AWS resource auto-tagging system using Terraform and provides guidance for potential improvements to the system.
+This README file includes comprehensive instructions for deploying and managing the AWS resource auto-tagging system using Terraform. It highlights the automated deployment of the Python Lambda function, handling of environment-specific configurations, and security best practices.
