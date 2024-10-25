@@ -73,4 +73,4 @@ s3_key = "lambda_function.zip"
 - **Contributions**: Contributions are welcome! Please fork the repository, make your changes, and submit a pull request.
 - **Support**: For bugs and feature requests, please use the GitHub issues section of this repository.
 
-This README file includes comprehensive instructions for deploying and managing the AWS resource auto-tagging system using Terraform. It highlights the automated deployment of the Python Lambda function, handling of environment-specific configurations, and security best practices.
+This README file includes comprehensive instructions for deploying and managing the AWS resource auto-tagging system using Terraform. It highlights the automated deployment of the Python Lambda function, handling of environment-specific configurations, and security best practices..
